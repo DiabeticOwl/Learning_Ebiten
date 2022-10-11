@@ -107,7 +107,7 @@ func (g *Game) drawSideCurtains(screen *ebiten.Image) {
 	screen.DrawImage(sideCurtain, opts)
 
 	opts = &ebiten.DrawImageOptions{}
-	// Will draw from right to left.
+	// -1 in the X axis will draw from right to left.
 	opts.GeoM.Scale(-1, 1-newSidCurHRatio)
 	opts.GeoM.Translate(float64(sW), 0)
 
