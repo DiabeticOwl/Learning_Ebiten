@@ -45,8 +45,10 @@ func (g *Game) Update() error {
 // Draw draws the game screen.
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.drawTopCurtain(screen)
+	g.drawBackground(screen)
+	g.drawBackgroundWood(screen)
 	g.drawSideCurtains(screen)
+	g.drawTopCurtain(screen)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
@@ -69,29 +71,68 @@ func (g *Game) drawTopCurtain(screen *ebiten.Image) {
 	}
 }
 
+func (g *Game) drawBackgroundWood(screen *ebiten.Image) {
+	sW, sH := screen.Size()
+	topBgWW, _ := bgWood.Size()
+
+	// The Y position where it draws the wood background.
+	sHPos := float64(sH) * .80
+
+	nDraws := int(math.Ceil(float64(sW) / float64(topBgWW)))
+
+	for i := 0; i < nDraws; i++ {
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Translate(float64(topBgWW*i), sHPos)
+
+		screen.DrawImage(bgWood, opts)
+	}
+}
+
 func (g *Game) drawSideCurtains(screen *ebiten.Image) {
-	// TODO: Make the drawings be behind of the top curtain.
-	sW, _ := screen.Size()
-	// sidCurW, _ := sideCurtain.Size()
-	_, topCurH := topCurtain.Size()
+	sW, sH := screen.Size()
+	_, sidCurH := sideCurtain.Size()
+
+	// Setting the maximum height of the curtain by 85% of the screen.
+	// The new ratio will determine how much the curtain must belittle or
+	// enlarge itself. If the screen is bigger than the curtain image, the scale
+	// on the Y axis will be positive (enlarging the image).
+	sHLimit := float64(sH) * .85
+	sidCurHDelta := float64(sidCurH) - sHLimit
+	newSidCurHRatio := sidCurHDelta / float64(sidCurH)
 
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(0, float64(topCurH-20))
+	opts.GeoM.Scale(1, 1-newSidCurHRatio)
+	opts.GeoM.Translate(0, 0)
 
 	screen.DrawImage(sideCurtain, opts)
 
 	opts = &ebiten.DrawImageOptions{}
 	// Will draw from right to left.
-	opts.GeoM.Scale(-1, 1)
-	opts.GeoM.Translate(float64(sW), float64(topCurH-20))
+	opts.GeoM.Scale(-1, 1-newSidCurHRatio)
+	opts.GeoM.Translate(float64(sW), 0)
 
 	screen.DrawImage(sideCurtain, opts)
+}
+
+func (g *Game) drawBackground(screen *ebiten.Image) {
+	sW, sH := screen.Size()
+	bgW, bgH := bgGreen.Size()
+
+	bgWDelta := float64(bgW - sW)
+	newbgWRatio := bgWDelta / float64(bgW)
+	bgHDelta := float64(bgH - sH)
+	newbgHRatio := bgHDelta / float64(bgH)
+
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Scale(1-newbgWRatio, 1-newbgHRatio)
+
+	screen.DrawImage(bgGreen, opts)
 }
 
 func main() {
 	game := &Game{}
 
-	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowSize(700, 500)
 	ebiten.SetWindowTitle("Simple Shooter Game")
 
 	if err := ebiten.RunGame(game); err != nil {
