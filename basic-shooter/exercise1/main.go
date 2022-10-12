@@ -102,7 +102,6 @@ func (g *Game) drawSideCurtains(screen *ebiten.Image) {
 
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Scale(1, 1-newSidCurHRatio)
-	opts.GeoM.Translate(0, 0)
 
 	screen.DrawImage(sideCurtain, opts)
 
