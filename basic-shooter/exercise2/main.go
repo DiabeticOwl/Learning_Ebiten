@@ -5,6 +5,8 @@ import (
 	"image"
 	_ "image/png"
 	"math"
+	"math/rand"
+	"time"
 
 	objResources "basic-shooter-exercise-2/resources/PNG/objects"
 	pngResources "basic-shooter-exercise-2/resources/PNG/stall"
@@ -14,17 +16,21 @@ import (
 
 // Game implements the ebiten.Game interface.
 type Game struct {
-	tick  float64
+	tick  int
 	speed float64
 
-	duckHPos float64
+	duckInitialHeightPos float64
+	ducks                []*Duck
 
 	waterOffsetX float64
 	waterOffsetY float64
+
+	screenWidth int
 }
 
 var (
-	waterDirection int
+	waterDirectionX int
+	waterDirectionY int
 
 	topCurtain             *ebiten.Image
 	sideCurtain            *ebiten.Image
@@ -39,6 +45,8 @@ const (
 	maxWaterOffsetX   = 100
 	waterOffsetYSpeed = .3
 	maxWaterOffsetY   = 20
+
+	maxDuckOffsetY = 10
 )
 
 func decodeImage(imgSlice []byte) *ebiten.Image {
@@ -64,18 +72,43 @@ func (g *Game) Update() error {
 	g.tick++
 
 	if g.waterOffsetX >= maxWaterOffsetX {
-		waterDirection = -waterDirection
+		waterDirectionX = -waterDirectionX
 	} else if g.waterOffsetX <= 0 {
-		waterDirection = 1
+		waterDirectionX = 1
 	}
-	g.waterOffsetX += float64(waterDirection) * waterOffsetXSpeed
+	g.waterOffsetX += float64(waterDirectionX) * waterOffsetXSpeed
 
 	if g.waterOffsetY >= maxWaterOffsetY {
-		waterDirection = -waterDirection
+		waterDirectionY = -waterDirectionY
 	} else if g.waterOffsetY <= 0 {
-		waterDirection = 1
+		waterDirectionY = 1
 	}
-	g.waterOffsetY += float64(waterDirection) * waterOffsetYSpeed
+	g.waterOffsetY += float64(waterDirectionY) * waterOffsetYSpeed
+
+	// Ducks logic
+	if g.tick%60 == 0 && rand.Float64() < 0.5 {
+		g.ducks = append(g.ducks, newDuck())
+	}
+
+	n := 0
+	for _, duck := range g.ducks {
+		if int(duck.offsetX) >= g.screenWidth {
+			n++
+			continue
+		}
+
+		duck.offsetX += 1.5
+		duck.offsetY += 1.5 * float64(duck.yDirection)
+
+		if rand.Float64() < 0.4 {
+			duck.yDirection *= -1
+		}
+
+		if duck.offsetY >= maxDuckOffsetY {
+			duck.yDirection = -1
+		}
+	}
+	g.ducks = g.ducks[n:]
 
 	return nil
 }
@@ -87,7 +120,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawMovingWater(screen)
 	g.drawBackgroundWood(screen)
 	g.drawSideCurtains(screen)
-	g.drawMovingDuck(screen)
+	g.drawMovingDucks(screen)
 	g.drawTopCurtain(screen)
 }
 
@@ -97,16 +130,16 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return outsideWidth, outsideHeight
 }
 
-func (g *Game) drawMovingDuck(screen *ebiten.Image) {
-	dOutTarWhiW, dOutTarWhiH := duckOutlineTargetWhite.Size()
+func (g *Game) drawMovingDucks(screen *ebiten.Image) {
 	sidCurW, _ := sideCurtain.Size()
 
-	g.duckHPos -= float64(dOutTarWhiH)
+	for _, duck := range g.ducks {
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Translate(float64(sidCurW)-float64(duck.w)/2, g.duckInitialHeightPos-float64(duck.h)*.9)
+		opts.GeoM.Translate(duck.offsetX, duck.offsetY)
 
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(sidCurW)-float64(dOutTarWhiW)/2, g.duckHPos)
-
-	screen.DrawImage(duckOutlineTargetWhite, opts)
+		screen.DrawImage(duck.img, opts)
+	}
 }
 
 func (g *Game) drawMovingWater(screen *ebiten.Image) {
@@ -118,7 +151,7 @@ func (g *Game) drawMovingWater(screen *ebiten.Image) {
 	sHPos := float64(sH) * .82
 	sHPos -= float64(wat1H) * waterScale
 
-	g.duckHPos = sHPos
+	g.duckInitialHeightPos = sHPos
 
 	nDraws := int(math.Ceil(float64(sW) / (float64(wat1W) * waterScale)))
 
@@ -207,8 +240,11 @@ func (g *Game) drawBackground(screen *ebiten.Image) {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixMicro())
+
 	game := &Game{
-		speed: 60 / 30,
+		speed:       60 / 30,
+		screenWidth: 700,
 	}
 
 	ebiten.SetWindowSize(700, 500)
