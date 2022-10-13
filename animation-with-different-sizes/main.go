@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"image"
 	_ "image/png"
-	"os"
 
 	resources "animation-with-different-sizes/resources/png"
 
@@ -32,6 +32,8 @@ type frameSpec struct {
 
 var (
 	coins *ebiten.Image
+	//go:embed resources/coins.json
+	jsonFile embed.FS
 )
 
 const (
@@ -89,8 +91,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // buildFrames takes the path of the configuration file for the frames of the
 // sprite sheet and parses it on the game instance attached to this method.
-func (g *Game) buildFrames(path string) {
-	j, _ := os.ReadFile(path)
+func (g *Game) buildFrames() {
+	j, err := jsonFile.ReadFile("resources/coins.json")
+	if err != nil {
+		panic(err)
+	}
+
 	fSpec := &framesSpec{}
 
 	json.Unmarshal(j, fSpec)
@@ -100,10 +106,6 @@ func (g *Game) buildFrames(path string) {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		panic("Please pass the configuration file for the image to animate.")
-	}
-
 	ebiten.SetWindowSize(400, 400)
 	ebiten.SetWindowTitle("Animation with various sizes")
 
@@ -112,7 +114,7 @@ func main() {
 		speed: 60 / 20,
 	}
 
-	g.buildFrames(os.Args[1])
+	g.buildFrames()
 
 	if err := ebiten.RunGame(g); err != nil {
 		panic(err)
