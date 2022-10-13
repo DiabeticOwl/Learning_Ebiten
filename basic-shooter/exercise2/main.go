@@ -6,7 +6,7 @@ import (
 	_ "image/png"
 	"math"
 
-	resources "basic-shooter-exercise-1/resources/PNG/stall"
+	resources "basic-shooter-exercise-2/resources/PNG/stall"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
