@@ -4,4 +4,4 @@ This exercise draws different frames from an image using the Update and Draw met
 
 | ![programPreview](https://i.imgur.com/5C1ZVlV.gif) |
 | :-: |
-| *Preview of the animation. (The speed shown in the GIF may be different that the one programmed.)* |
+| *Preview of the animation. (The speed shown in the GIF may be different than the one programmed.)* |
