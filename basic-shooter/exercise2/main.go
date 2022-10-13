@@ -6,19 +6,39 @@ import (
 	_ "image/png"
 	"math"
 
-	resources "basic-shooter-exercise-2/resources/PNG/stall"
+	objResources "basic-shooter-exercise-2/resources/PNG/objects"
+	pngResources "basic-shooter-exercise-2/resources/PNG/stall"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Game implements the ebiten.Game interface.
-type Game struct{}
+type Game struct {
+	tick  float64
+	speed float64
+
+	duckHPos float64
+
+	waterOffsetX float64
+	waterOffsetY float64
+}
 
 var (
-	topCurtain  *ebiten.Image
-	sideCurtain *ebiten.Image
-	bgGreen     *ebiten.Image
-	bgWood      *ebiten.Image
+	waterDirection int
+
+	topCurtain             *ebiten.Image
+	sideCurtain            *ebiten.Image
+	bgGreen                *ebiten.Image
+	bgWood                 *ebiten.Image
+	water1                 *ebiten.Image
+	duckOutlineTargetWhite *ebiten.Image
+)
+
+const (
+	waterOffsetXSpeed = 1
+	maxWaterOffsetX   = 100
+	waterOffsetYSpeed = .3
+	maxWaterOffsetY   = 20
 )
 
 func decodeImage(imgSlice []byte) *ebiten.Image {
@@ -30,15 +50,33 @@ func decodeImage(imgSlice []byte) *ebiten.Image {
 }
 
 func init() {
-	topCurtain = decodeImage(resources.TopCurtain_png)
-	sideCurtain = decodeImage(resources.SideCurtain_png)
-	bgGreen = decodeImage(resources.BgGreen_png)
-	bgWood = decodeImage(resources.BgWood_png)
+	topCurtain = decodeImage(pngResources.TopCurtain_png)
+	sideCurtain = decodeImage(pngResources.SideCurtain_png)
+	bgGreen = decodeImage(pngResources.BgGreen_png)
+	water1 = decodeImage(pngResources.Water1_png)
+	bgWood = decodeImage(pngResources.BgWood_png)
+	duckOutlineTargetWhite = decodeImage(objResources.DuckOutlineTargetWhite_png)
 }
 
 // Update proceeds the game state.
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
+	g.tick++
+
+	if g.waterOffsetX >= maxWaterOffsetX {
+		waterDirection = -waterDirection
+	} else if g.waterOffsetX <= 0 {
+		waterDirection = 1
+	}
+	g.waterOffsetX += float64(waterDirection) * waterOffsetXSpeed
+
+	if g.waterOffsetY >= maxWaterOffsetY {
+		waterDirection = -waterDirection
+	} else if g.waterOffsetY <= 0 {
+		waterDirection = 1
+	}
+	g.waterOffsetY += float64(waterDirection) * waterOffsetYSpeed
+
 	return nil
 }
 
@@ -46,8 +84,10 @@ func (g *Game) Update() error {
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawBackground(screen)
+	g.drawMovingWater(screen)
 	g.drawBackgroundWood(screen)
 	g.drawSideCurtains(screen)
+	g.drawMovingDuck(screen)
 	g.drawTopCurtain(screen)
 }
 
@@ -55,6 +95,44 @@ func (g *Game) Draw(screen *ebiten.Image) {
 // If you don't have to adjust the screen size with the outside size, just return a fixed size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return outsideWidth, outsideHeight
+}
+
+func (g *Game) drawMovingDuck(screen *ebiten.Image) {
+	dOutTarWhiW, dOutTarWhiH := duckOutlineTargetWhite.Size()
+	sidCurW, _ := sideCurtain.Size()
+
+	g.duckHPos -= float64(dOutTarWhiH)
+
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Translate(float64(sidCurW)-float64(dOutTarWhiW)/2, g.duckHPos)
+
+	screen.DrawImage(duckOutlineTargetWhite, opts)
+}
+
+func (g *Game) drawMovingWater(screen *ebiten.Image) {
+	sW, sH := screen.Size()
+	wat1W, wat1H := water1.Size()
+
+	waterScale := .4
+
+	sHPos := float64(sH) * .82
+	sHPos -= float64(wat1H) * waterScale
+
+	g.duckHPos = sHPos
+
+	nDraws := int(math.Ceil(float64(sW) / (float64(wat1W) * waterScale)))
+
+	for i := -1; i < nDraws; i++ {
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Scale(waterScale, waterScale)
+
+		imgW := float64(wat1W*i) * waterScale
+
+		opts.GeoM.Translate(imgW, sHPos)
+		opts.GeoM.Translate(g.waterOffsetX, g.waterOffsetY)
+
+		screen.DrawImage(water1, opts)
+	}
 }
 
 func (g *Game) drawTopCurtain(screen *ebiten.Image) {
@@ -129,7 +207,9 @@ func (g *Game) drawBackground(screen *ebiten.Image) {
 }
 
 func main() {
-	game := &Game{}
+	game := &Game{
+		speed: 60 / 30,
+	}
 
 	ebiten.SetWindowSize(700, 500)
 	ebiten.SetWindowTitle("Simple Shooter Game")
