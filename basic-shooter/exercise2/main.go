@@ -119,8 +119,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawBackground(screen)
 	g.drawMovingWater(screen)
 	g.drawBackgroundWood(screen)
-	g.drawSideCurtains(screen)
 	g.drawMovingDucks(screen)
+	g.drawSideCurtains(screen)
 	g.drawTopCurtain(screen)
 }
 
