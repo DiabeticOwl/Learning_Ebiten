@@ -100,7 +100,6 @@ func (g *Game) Update() error {
 	leftButtonPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	if leftButtonPressed && now.Sub(g.crossHair.lastClickAt) > debouncer {
 		g.crossHair.lastClickAt = now
-		g.crossHair.clicked = leftButtonPressed
 
 		for duck := range g.ducks {
 			dXPos := duck.offsetX + float64(duck.w)
@@ -115,7 +114,6 @@ func (g *Game) Update() error {
 			// needs to be in order to take down the duck.
 			if xDelta <= 40 && (yDelta >= 10 && yDelta <= 100) {
 				delete(g.ducks, duck)
-				g.crossHair.clicked = false
 				break
 			}
 		}
