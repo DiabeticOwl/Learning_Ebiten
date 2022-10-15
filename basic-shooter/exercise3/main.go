@@ -21,7 +21,7 @@ type Game struct {
 	speed float64
 
 	duckInitialHeightPos float64
-	ducks                []*Duck
+	ducks                map[*Duck]struct{}
 
 	waterOffsetX float64
 	waterOffsetY float64
@@ -51,6 +51,8 @@ const (
 	maxWaterOffsetY   = 20
 
 	maxDuckOffsetY = 10
+
+	debouncer = 200 * time.Millisecond
 )
 
 func decodeImage(imgSlice []byte) *ebiten.Image {
@@ -76,10 +78,6 @@ func init() {
 func (g *Game) Update() error {
 	g.tick++
 
-	// CrossHair Logic
-	g.crossHair.x, g.crossHair.y = ebiten.CursorPosition()
-	g.crossHair.clicked = ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
-
 	// Water Logic
 	if g.waterOffsetX >= maxWaterOffsetX {
 		waterDirectionX = -waterDirectionX
@@ -95,20 +93,48 @@ func (g *Game) Update() error {
 	}
 	g.waterOffsetY += float64(waterDirectionY) * waterOffsetYSpeed
 
-	// Ducks logic
-	if g.tick%60 == 0 && rand.Float64() < 0.5 {
-		g.ducks = append(g.ducks, newDuck())
+	// CrossHair Logic
+	g.crossHair.x, g.crossHair.y = ebiten.CursorPosition()
+
+	now := time.Now()
+	leftButtonPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	if leftButtonPressed && now.Sub(g.crossHair.lastClickAt) > debouncer {
+		g.crossHair.lastClickAt = now
+		g.crossHair.clicked = leftButtonPressed
+
+		for duck := range g.ducks {
+			dXPos := duck.offsetX + float64(duck.w)
+			// The greater the position in Y is the more it will be towards
+			// the bottom of the screen.
+			dYPos := g.duckInitialHeightPos - float64(duck.h) - duck.offsetY
+
+			xDelta := math.Abs(float64(g.crossHair.x) - dXPos)
+			yDelta := math.Abs(float64(g.crossHair.y) - dYPos)
+
+			// 40, 10 and 100 is an arbitrary number for how close the crosshair
+			// needs to be in order to take down the duck.
+			if xDelta <= 40 && (yDelta >= 10 && yDelta <= 100) {
+				delete(g.ducks, duck)
+				g.crossHair.clicked = false
+				break
+			}
+		}
 	}
 
-	n := 0
-	for _, duck := range g.ducks {
-		if int(duck.offsetX) >= g.screenWidth || !duck.onScreen {
-			n++
-			continue
-		}
+	// Ducks logic
+	if g.tick%60 == 0 && rand.Float64() < 0.6 {
+		g.ducks[newDuck(len(g.ducks)+1)] = struct{}{}
+	}
 
+	for duck := range g.ducks {
 		duck.offsetX += 1.5
 		duck.offsetY += 1.5 * float64(duck.yDirection)
+
+		if int(duck.offsetX) >= g.screenWidth {
+			delete(g.ducks, duck)
+			g.crossHair.clicked = false
+			continue
+		}
 
 		if rand.Float64() < 0.4 {
 			duck.yDirection *= -1
@@ -118,7 +144,6 @@ func (g *Game) Update() error {
 			duck.yDirection = -1
 		}
 	}
-	g.ducks = g.ducks[n:]
 
 	return nil
 }
@@ -162,9 +187,9 @@ func (g *Game) drawCrossHair(screen *ebiten.Image) {
 func (g *Game) drawMovingDucks(screen *ebiten.Image) {
 	sidCurW, _ := sideCurtain.Size()
 
-	for _, duck := range g.ducks {
+	for duck := range g.ducks {
 		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(float64(sidCurW)-float64(duck.w)/2, g.duckInitialHeightPos-float64(duck.h)*.9)
+		opts.GeoM.Translate(float64(sidCurW)-float64(duck.w)/2, g.duckInitialHeightPos-float64(duck.h))
 		opts.GeoM.Translate(duck.offsetX, duck.offsetY)
 
 		screen.DrawImage(duck.img, opts)
@@ -180,7 +205,9 @@ func (g *Game) drawMovingWater(screen *ebiten.Image) {
 	sHPos := float64(sH) * .82
 	sHPos -= float64(wat1H) * waterScale
 
-	g.duckInitialHeightPos = sHPos
+	// The greater this number is the more height is taking from the screen i.e.,
+	// the drawing will go more towards the bottom.
+	g.duckInitialHeightPos = sHPos + sHPos*.10
 
 	nDraws := int(math.Ceil(float64(sW) / (float64(wat1W) * waterScale)))
 
@@ -275,6 +302,7 @@ func main() {
 		speed:       60 / 30,
 		screenWidth: 700,
 		crossHair:   newCrosshair(),
+		ducks:       make(map[*Duck]struct{}),
 	}
 
 	ebiten.SetWindowSize(700, 500)

@@ -3,6 +3,7 @@ package main
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Duck struct {
+	id      int
 	img     *ebiten.Image
 	w       int
 	h       int
@@ -10,17 +11,16 @@ type Duck struct {
 	offsetY float64
 	// Ducks will always go in the right direction horizontally.
 	yDirection int
-	onScreen   bool
 }
 
-func newDuck() *Duck {
+func newDuck(id int) *Duck {
 	dW, dH := duckOutlineTargetWhite.Size()
 
 	return &Duck{
+		id:         id,
 		img:        duckOutlineTargetWhite,
 		w:          dW,
 		h:          dH,
 		yDirection: 1,
-		onScreen:   true,
 	}
 }
