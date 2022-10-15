@@ -3,7 +3,6 @@ package main
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Duck struct {
-	id      int
 	img     *ebiten.Image
 	w       int
 	h       int
@@ -13,11 +12,10 @@ type Duck struct {
 	yDirection int
 }
 
-func newDuck(id int) *Duck {
+func newDuck() *Duck {
 	dW, dH := duckOutlineTargetWhite.Size()
 
 	return &Duck{
-		id:         id,
 		img:        duckOutlineTargetWhite,
 		w:          dW,
 		h:          dH,

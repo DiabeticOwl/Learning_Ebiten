@@ -123,7 +123,7 @@ func (g *Game) Update() error {
 
 	// Ducks logic
 	if g.tick%60 == 0 && rand.Float64() < 0.6 {
-		g.ducks[newDuck(len(g.ducks)+1)] = struct{}{}
+		g.ducks[newDuck()] = struct{}{}
 	}
 
 	for duck := range g.ducks {
