@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
+	"image/color"
 	_ "image/png"
 	"math"
 	"math/rand"
@@ -11,8 +13,12 @@ import (
 	hudResources "basic-shooter-exercise-3/resources/PNG/hud"
 	objResources "basic-shooter-exercise-3/resources/PNG/objects"
 	pngResources "basic-shooter-exercise-3/resources/PNG/stall"
+	fntResources "basic-shooter-exercise-3/resources/fonts"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
 )
 
 // Game implements the ebiten.Game interface.
@@ -29,6 +35,8 @@ type Game struct {
 	screenWidth int
 
 	crossHair *CrossHair
+
+	score int
 }
 
 var (
@@ -42,6 +50,8 @@ var (
 	water1                 *ebiten.Image
 	duckOutlineTargetWhite *ebiten.Image
 	crosshairImage         *ebiten.Image
+
+	penguinAttackFnt font.Face
 )
 
 const (
@@ -73,6 +83,8 @@ func init() {
 	bgWood = decodeImage(pngResources.BgWood_png)
 	duckOutlineTargetWhite = decodeImage(objResources.DuckOutlineTargetWhite_png)
 	crosshairImage = decodeImage(hudResources.Crosshair_png)
+	penguinAttackFnt = importFont(fntResources.PenguinAttack_font,
+		&truetype.Options{Size: 22})
 }
 
 // Update proceeds the game state.
@@ -116,6 +128,8 @@ func (g *Game) Update() error {
 			// needs to be in order to take down the duck.
 			if xDelta <= 40 && (yDelta >= 10 && yDelta <= 100) {
 				delete(g.ducks, duck)
+				// TODO: Add removal of points.
+				g.score += 10
 				break
 			}
 		}
@@ -160,6 +174,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawCrossHair(screen)
 	g.drawSideCurtains(screen)
 	g.drawTopCurtain(screen)
+	g.drawScore(screen)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the
@@ -168,6 +183,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 // return a fixed size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return outsideWidth, outsideHeight
+}
+
+func (g *Game) drawScore(screen *ebiten.Image) {
+	score := fmt.Sprintf("Score: %d", g.score)
+	bounds := text.BoundString(penguinAttackFnt, score)
+
+	text.Draw(screen, score, penguinAttackFnt, 10, bounds.Dy(), color.Black)
 }
 
 func (g *Game) drawCrossHair(screen *ebiten.Image) {
