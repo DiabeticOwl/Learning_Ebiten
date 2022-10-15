@@ -52,6 +52,8 @@ const (
 
 	maxDuckOffsetY = 10
 
+	// Used for delimiting how long a click can take. If the user presses for
+	// more than 200 milliseconds then the game will see it as an unique click.
 	debouncer = 200 * time.Millisecond
 )
 
