@@ -84,7 +84,7 @@ func init() {
 	duckOutlineTargetWhite = decodeImage(objResources.DuckOutlineTargetWhite_png)
 	crosshairImage = decodeImage(hudResources.Crosshair_png)
 	penguinAttackFnt = importFont(fntResources.PenguinAttack_font,
-		&truetype.Options{Size: 22})
+		&truetype.Options{Size: 60})
 }
 
 // Update proceeds the game state.
@@ -113,6 +113,7 @@ func (g *Game) Update() error {
 	now := time.Now()
 	leftButtonPressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	if leftButtonPressed && now.Sub(g.crossHair.lastClickAt) > debouncer {
+		oldScore := g.score
 		g.crossHair.lastClickAt = now
 
 		for duck := range g.ducks {
@@ -128,10 +129,14 @@ func (g *Game) Update() error {
 			// needs to be in order to take down the duck.
 			if xDelta <= 40 && (yDelta >= 10 && yDelta <= 100) {
 				delete(g.ducks, duck)
-				// TODO: Add removal of points.
+
 				g.score += 10
 				break
 			}
+		}
+
+		if oldScore == g.score {
+			g.score -= 5
 		}
 	}
 
@@ -186,10 +191,10 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) drawScore(screen *ebiten.Image) {
+	_, sH := screen.Size()
 	score := fmt.Sprintf("Score: %d", g.score)
-	bounds := text.BoundString(penguinAttackFnt, score)
 
-	text.Draw(screen, score, penguinAttackFnt, 10, bounds.Dy(), color.Black)
+	text.Draw(screen, score, penguinAttackFnt, 10, int(float64(sH)*.95), color.Black)
 }
 
 func (g *Game) drawCrossHair(screen *ebiten.Image) {
