@@ -141,7 +141,7 @@ func (g *Game) Update() error {
 	}
 
 	// Ducks logic
-	// Each second (tick/60) there is a 60% chance of a duck appearing
+	// Each second (where tick/60==0) there is a 60% chance of a duck appearing
 	// into the screen.
 	if g.tick%60 == 0 && rand.Float64() < 0.6 {
 		g.ducks[newDuck()] = struct{}{}
