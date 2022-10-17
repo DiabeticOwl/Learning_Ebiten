@@ -335,7 +335,7 @@ func main() {
 	}
 
 	ebiten.SetWindowSize(700, 500)
-	ebiten.SetWindowTitle("Simple Shooter Game")
+	ebiten.SetWindowTitle("Shoot the Duck")
 
 	if err := ebiten.RunGame(game); err != nil {
 		panic(err)

@@ -2,4 +2,4 @@
 
 In this exercise the initial background of the game is created.
 
-![backgroundPreview](https://i.imgur.com/nvdREIq.png)
+![backgroundPreview](https://github.com/DiabeticOwl/Learning_Ebiten/blob/master/basic-shooter/exercise1/background.png)
