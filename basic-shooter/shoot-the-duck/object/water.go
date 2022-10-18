@@ -64,6 +64,8 @@ func (bg *water) Draw(screen *ebiten.Image) {
 
 	nDraws := int(math.Ceil(float64(sW) / (float64(wat1W) * waterScale)))
 
+	// -2 will repeat two more draws of the image towards the left side
+	// of the screen. Filling the gap left by the movement of the water.
 	for i := -2; i < nDraws; i++ {
 		opts := &ebiten.DrawImageOptions{}
 		opts.GeoM.Scale(waterScale, waterScale)

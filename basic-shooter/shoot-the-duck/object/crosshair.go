@@ -10,23 +10,24 @@ import (
 	"shoot-the-duck/utils"
 )
 
+type crossHair struct {
+	x           int
+	y           int
+	lastClickAt time.Time
+}
+
 const (
 	// Used for delimiting how long a click can take. If the user presses for
 	// more than 200 milliseconds then the game will see it as an unique click.
 	debouncer = 200 * time.Millisecond
 )
 
-type crossHair struct {
-	img         *ebiten.Image
-	x           int
-	y           int
-	lastClickAt time.Time
-}
+var (
+	cImg = utils.DecodeImage(hud.Crosshair_png)
+)
 
 func NewCrosshair() Object {
-	return &crossHair{
-		img: utils.DecodeImage(hud.Crosshair_png),
-	}
+	return &crossHair{}
 }
 
 func (c *crossHair) Update() {
@@ -64,7 +65,7 @@ func (c *crossHair) Update() {
 }
 
 func (c *crossHair) Draw(screen *ebiten.Image) {
-	croHaiW, croHaiH := c.img.Size()
+	croHaiW, croHaiH := cImg.Size()
 
 	// Coordinates must be adjusted to halve of the image size in order to focus
 	// the image towards the mouse.
@@ -76,5 +77,5 @@ func (c *crossHair) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(croHaiXPos, croHaiYPos)
 
-	screen.DrawImage(c.img, opts)
+	screen.DrawImage(cImg, opts)
 }

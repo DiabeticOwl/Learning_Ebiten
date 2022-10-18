@@ -23,10 +23,12 @@ const (
 	maxDuckOffsetY = 10
 )
 
-func NewDuck() *Duck {
-	dImg := utils.DecodeImage(objResources.DuckOutlineTargetWhite_png)
-	dW, dH := dImg.Size()
+var (
+	dImg   = utils.DecodeImage(objResources.DuckOutlineTargetWhite_png)
+	dW, dH = dImg.Size()
+)
 
+func NewDuck() *Duck {
 	return &Duck{
 		img:        dImg,
 		w:          dW,
@@ -48,7 +50,6 @@ func (d *Duck) Update() {
 
 		if int(duck.offsetX) >= GameScreenWidth {
 			delete(Ducks, duck)
-			// g.crossHair.clicked = false
 			continue
 		}
 
