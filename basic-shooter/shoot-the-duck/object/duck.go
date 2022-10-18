@@ -53,7 +53,7 @@ func (d *Duck) Update() {
 		}
 
 		if rand.Float64() < 0.4 {
-			duck.yDirection *= up
+			duck.yDirection *= -1
 		}
 
 		if duck.offsetY >= maxDuckOffsetY {
