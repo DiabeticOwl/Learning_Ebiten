@@ -2,8 +2,8 @@
 
 Final version of the "Shoot the duck" game. The main difference from the
 [exercise3](https://github.com/DiabeticOwl/Learning_Ebiten/blob/master/basic-shooter/exercise3/)
-is a code refactor in which the project is divided in three packages; main,
-object and utils.
+is a code refactor in which the project is divided in three packages; `main`,
+`object` and `utils`, alongside the already implemented `resources` package.
 
 ## Main
 
@@ -18,7 +18,11 @@ user in the game.
 
 ## Util
 
-Is a collection of functions that automatizes processes like the decoding of an
-image in a slice of bytes.
+Corpora of functions that automatizes processes like the decoding of an image in
+a slice of bytes.
+
+## Resources
+
+Collection of miscellaneous files used throughout the entire application.
 
 ![gamePreview](https://github.com/DiabeticOwl/Learning_Ebiten/blob/master/basic-shooter/shoot-the-duck/Shoot-The-Duck-Initial.gif)
