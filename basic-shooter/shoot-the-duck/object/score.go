@@ -26,9 +26,8 @@ func NewScore() Object {
 func (bg *score) Update() {}
 
 func (bg *score) Draw(screen *ebiten.Image) {
-	_, sH := screen.Size()
 	score := fmt.Sprintf("Score: %d", *GameScore)
 
-	text.Draw(screen, score, penguinAttackFnt, 10, int(float64(sH)*.95),
-		color.Black)
+	text.Draw(screen, score, penguinAttackFnt, 10,
+		int(float64(GameScreenHeight)*.95), color.Black)
 }
