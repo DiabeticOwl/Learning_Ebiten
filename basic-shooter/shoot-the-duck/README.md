@@ -7,7 +7,7 @@ is a code refactor in which the project is divided in three packages; `main`,
 
 ## Main
 
-Is the heart of the game in which the [framework's engine](https://ebitengine.org/)
+Is the heart of the game in which the [engine](https://ebitengine.org/)
 is instantiated and run looping through a list of objects that will draw and
 update themselves accordingly.
 
