@@ -47,11 +47,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the
-// (logical) screen size.
+// (logical) screen size. It runs every time the outside size changes.
 // If you don't have to adjust the screen size with the outside size, just
 // return a fixed size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	// If the screen size value in the Object value is not changed then
+	// when the application is rescaled towards the size of the web browser each
+	// object that depends on GameScreenWidth and GameScreenHeight will have
+	// outdated values.
+	object.GameScreenWidth = outsideWidth
+	object.GameScreenHeight = outsideHeight
+
 	return outsideWidth, outsideHeight
+
 }
 
 func main() {
