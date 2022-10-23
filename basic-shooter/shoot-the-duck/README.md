@@ -5,6 +5,10 @@ Final version of the "Shoot the duck" game. The main difference from the
 is a code refactor in which the project is divided in three packages; `main`,
 `object` and `utils`, alongside the already implemented `resources` package.
 
+The game is also able to be played through a web browser by using
+[WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly)
+with a file server.
+
 ## Main
 
 Is the heart of the game in which the [engine](https://ebitengine.org/)
