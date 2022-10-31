@@ -23,9 +23,9 @@ func NewScore() Object {
 	return &score{}
 }
 
-func (bg *score) Update() {}
+func (sc *score) Update() {}
 
-func (bg *score) Draw(screen *ebiten.Image) {
+func (sc *score) Draw(screen *ebiten.Image) {
 	score := fmt.Sprintf("Score: %d", *GameScore)
 
 	text.Draw(screen, score, penguinAttackFnt, 10,
