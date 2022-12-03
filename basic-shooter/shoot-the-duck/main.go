@@ -26,7 +26,7 @@ const (
 )
 
 // Update proceeds the game state by executing the "Update" method in each
-// passed object.
+// object within the game itself.
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
 	*g.tick++
