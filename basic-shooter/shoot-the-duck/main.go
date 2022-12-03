@@ -38,7 +38,7 @@ func (g *Game) Update() error {
 	return nil
 }
 
-// Draw executes the "Draw" method in each passed object.
+// Draw executes the "Draw" method in each object within the game itself.
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *Game) Draw(screen *ebiten.Image) {
 	for _, o := range g.objects {
